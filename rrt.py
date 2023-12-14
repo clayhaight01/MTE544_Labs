@@ -42,7 +42,7 @@ class RRT:
                  expand_dis=3.0,
                  path_resolution=0.5,
                  goal_sample_rate=5,
-                 max_iter=500,
+                 max_iter=1500,
                  play_area=None,
                  robot_radius=0.0,
                  ):
@@ -210,7 +210,7 @@ class RRT:
         plt.axis("equal")
         plt.axis([-2, 15, -2, 15])
         plt.grid(True)
-        plt.pause(0.01)
+        plt.pause(0.001)
 
     @staticmethod
     def plot_circle(x, y, size, color="-b"):  # pragma: no cover
@@ -289,6 +289,7 @@ def main(gx=6.0, gy=10.0):
         rand_area=[-2, 15],
         obstacle_list=obstacleList,
         # play_area=[0, 10, 0, 14]
+        max_iter=1500,
         robot_radius=0.8
         )
     path = rrt.planning(animation=show_animation)

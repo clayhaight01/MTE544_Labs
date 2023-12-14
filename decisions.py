@@ -154,8 +154,6 @@ class decision_maker(Node):
 
 import argparse
 def main(args=None):
-    
-    
     init()
     
     odom_qos=QoSProfile(reliability=2, durability=2, history=1, depth=10)
@@ -163,7 +161,7 @@ def main(args=None):
     if args.motion == "point":
         DM=decision_maker(Twist, "/cmd_vel", 10, motion_type=POINT_PLANNER)
     elif args.motion == "trajectory":
-        DM=decision_maker(Twist, "/cmd_vel", 10, motion_type=TRAJECTORY_PLANNER)
+        DM=decision_maker(Twist, "/cmd_vel", 10, motion_type=RRT_PLANNER)
     else:
         print("invalid motion type", file=sys.stderr)
 
@@ -178,8 +176,6 @@ def main(args=None):
     except e:
         print("error")
         return 
-
-
 
 
 if __name__=="__main__":
