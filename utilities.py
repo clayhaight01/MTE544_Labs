@@ -112,7 +112,6 @@ def euler_from_quaternion(quat):
     return yaw
 
 def calculate_linear_error(current_pose, goal_pose):
-        
     return sqrt( (current_pose[0] - goal_pose[0])**2 +
                 (current_pose[1] - goal_pose[1])**2 )
 

@@ -10,9 +10,6 @@ M_PI=3.1415926535
 P=0; PD=1; PI=2; PID=3
 
 class controller:
-    
-    
-    
     def __init__(self, klp=0.2, klv=0.2, kli=0.2, kap=0.2, kav=0.2, kai=0.2):
         
         self.PID_linear=PID_ctrl(PID, klp, klv, kli, filename_="linear.csv")
@@ -64,12 +61,13 @@ class trajectoryController(controller):
 
 
     def lookFarFor(self, pose, listGoals):
-        
-        poseArray=np.array([pose[0], pose[1]]) 
-        listGoalsArray=np.array(listGoals)
+        poseArray = np.array([pose[0], pose[1]])
+        listGoalsArray = np.array(listGoals)
 
-        distanceSquared=np.sum((listGoalsArray-poseArray)**2,
-                               axis=1)
-        closestIndex=np.argmin(distanceSquared)
+        if listGoalsArray.ndim == 1:
+            listGoalsArray = listGoalsArray.reshape(1, -1)
 
-        return listGoals[ min(closestIndex + 1, len(listGoals) - 1) ]
+        distanceSquared = np.sum((listGoalsArray - poseArray) ** 2, axis=1)
+        closestIndex = np.argmin(distanceSquared)
+
+        return listGoals[min(closestIndex + 1, len(listGoals) - 1)]

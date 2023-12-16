@@ -68,6 +68,7 @@ class decision_maker(Node):
 
         # hint: if you set the self.goal in here, you can bypass the rviz goal selector
         # this can be useful if you don't want to use the map
+        self.goal = (1,1)
 
     
     def designPathFor(self, msg: PoseStamped):
@@ -96,10 +97,10 @@ class decision_maker(Node):
         if self.goal is None:
             return
         
-        if type(self.goal) == list:
-            reached_goal=True if calculate_linear_error(self.localizer.getPose(), self.goal[-1]) <self.reachThreshold else False
+        if type(self.goal[-1]) == list:
+            reached_goal=True if calculate_linear_error(self.localizer.getPose(), self.goal[-1]) < self.reachThreshold else False
         else: 
-            reached_goal=True if calculate_linear_error(self.localizer.getPose(), self.goal) <self.reachThreshold else False
+            reached_goal=True if calculate_linear_error(self.localizer.getPose(), self.goal) < self.reachThreshold else False
 
 
 
@@ -161,21 +162,15 @@ def main(args=None):
     if args.motion == "point":
         DM=decision_maker(Twist, "/cmd_vel", 10, motion_type=POINT_PLANNER)
     elif args.motion == "trajectory":
-        DM=decision_maker(Twist, "/cmd_vel", 10, motion_type=RRT_PLANNER)
+        DM=decision_maker(Twist, "/cmd_vel", 10, motion_type=RRT_STAR_PLANNER)
     else:
         print("invalid motion type", file=sys.stderr)
 
-
-    
     try:
         spin(DM)
     except SystemExit:
         print(f"reached there successfully {DM.localizer.pose}")
         return
-
-    except e:
-        print("error")
-        return 
 
 
 if __name__=="__main__":

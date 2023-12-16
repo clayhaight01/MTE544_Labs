@@ -1,5 +1,7 @@
 from mapUtilities import *
 from a_star import *
+from rrt import *
+from rrt_star import *
 import time
 
 POINT_PLANNER=0; A_STAR_PLANNER=1; RRT_PLANNER=2; RRT_STAR_PLANNER=3
@@ -57,8 +59,37 @@ class planner:
 
         mazeOrigin = self.m_utilites.position_2_cell([0,0])
 
-        # TODO This is for A*, modify this part to use RRT*
-        path = search(self.costMap, startPose, endPose, scale_factor)
+        obstacle_list = [(5, 5, 1),
+                        (3, 6, 2),
+                        (3, 8, 2),
+                        (3, 10, 2),
+                        (7, 5, 2),
+                        (9, 5, 2),
+                        (8, 10, 1),
+                        (6, 12, 1),
+                        ]  # [x,y,size(radius)]
+        if self.type==A_STAR_PLANNER:
+            path = search(self.costMap, startPose, endPose, scale_factor)
+        elif self.type==RRT_PLANNER:
+            rrt = RRT(
+                    start=startPose,
+                    goal=endPose,
+                    rand_area=[-2, 15],
+                    obstacle_list=obstacle_list,
+                    max_iter=1500,
+                    robot_radius=0.8)
+            path = rrt.planning(animation=show_animation)
+        elif self.type==RRT_STAR_PLANNER:
+            rrt_star = RRTStar(
+                            start=startPose,
+                            goal=endPose,
+                            rand_area=[-2, 15],
+                            obstacle_list=obstacle_list,
+                            expand_dis=1,
+                            robot_radius=0.8,
+                            max_iter=1500)
+            path = rrt_star.planning(animation=show_animation)
+            path = rrt_star.smooth_path(path)
 
 
         end_time = time.time()
