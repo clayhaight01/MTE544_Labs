@@ -1,3 +1,4 @@
+import sys
 import rclpy
 from rclpy.node import Node
 from nav_msgs.msg import OccupancyGrid
@@ -14,7 +15,9 @@ if __name__ == "__main__":
 
     rclpy.init()
 
-    map_ = mapManipulator()
+    map_filename = sys.argv[1] if len(sys.argv) > 1 else 'room.yaml'
+
+    map_ = mapManipulator(map_filename)
 
     node = Node("mapPublisher")
 

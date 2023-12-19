@@ -1,5 +1,5 @@
 import sys
-
+import numpy as np
 from utilities import euler_from_quaternion, calculate_angular_error, calculate_linear_error
 from pid import PID_ctrl
 
@@ -41,8 +41,8 @@ class decision_maker(Node):
         self.reachThreshold=0.1
 
 
-        self.localizer=localization(rawSensors)
-
+        self.localizer=localization(kalmanFilter)
+        # self.localizer=localization(rawSensors)
 
         self.goal = None
 
@@ -54,7 +54,7 @@ class decision_maker(Node):
             self.planner=planner(POINT_PLANNER)
             return -1
 
-        self.controller=trajectoryController(klp=0.2, klv=0.5, kap=0.8, kav=0.6)      
+        self.controller=trajectoryController(klp=0.1, klv=0.2, kap=0.1, kav=0.6)      
         
         if motion_type in [RRT_PLANNER, RRT_STAR_PLANNER, A_STAR_PLANNER]:
             self.planner = planner(motion_type)
@@ -68,7 +68,7 @@ class decision_maker(Node):
 
         # hint: if you set the self.goal in here, you can bypass the rviz goal selector
         # this can be useful if you don't want to use the map
-        self.goal = (1,1)
+        # self.goal = (1,1)
 
     
     def designPathFor(self, msg: PoseStamped):
@@ -78,9 +78,11 @@ class decision_maker(Node):
         if self.localizer.getPose() is  None:
             print("waiting for odom msgs ....")
             return
-        
+        print("getPose: ",self.localizer.getPose())
+        print("msg.pose.", msg.pose.position.x, msg.pose.position.y)
         self.goal=self.planner.plan([self.localizer.getPose()[0], self.localizer.getPose()[1]],
                                      [msg.pose.position.x, msg.pose.position.y])
+        print("goal: ", self.goal)
 
     
     def timerCallback(self):
@@ -97,13 +99,19 @@ class decision_maker(Node):
         if self.goal is None:
             return
         
-        if type(self.goal[-1]) == list:
-            reached_goal=True if calculate_linear_error(self.localizer.getPose(), self.goal[-1]) < self.reachThreshold else False
-        else: 
-            reached_goal=True if calculate_linear_error(self.localizer.getPose(), self.goal) < self.reachThreshold else False
-
-
-
+        # if type(self.goal) == np.ndarray:
+        #     reached_goal=True if calculate_linear_error(self.localizer.getPose(), self.goal[-1]) < self.reachThreshold else False
+        # else: 
+        #     reached_goal=True if calculate_linear_error(self.localizer.getPose(), self.goal) < self.reachThreshold else False
+        if isinstance(self.goal, np.ndarray):
+            if self.goal.ndim == 2:
+                # It's a 2D array
+                reached_goal = True if calculate_linear_error(self.localizer.getPose(), self.goal[-1]) < self.reachThreshold else False
+            elif self.goal.ndim == 1:
+                # It's a 1D array
+                reached_goal = True if calculate_linear_error(self.localizer.getPose(), self.goal) < self.reachThreshold else False
+        else:
+            print("Error! goal is not a numpy array")
 
         if reached_goal:
             print("reached goal")
@@ -116,9 +124,8 @@ class decision_maker(Node):
             print("waiting for the new position input, use 2D nav goal on map")
 
             return
-        
-        velocity, yaw_rate = self.controller.\
-            vel_request(self.localizer.getPose(), self.goal, True)
+        # print("goal", self.goal)
+        velocity, yaw_rate = self.controller.vel_request(self.localizer.getPose(), self.goal, True)
 
         
         vel_msg.linear.x=velocity

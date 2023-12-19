@@ -17,8 +17,6 @@ class mapManipulator(Node):
 
 
     def __init__(self, filename_: str = "room.yaml", laser_sig=0.1):
-        
-        
         super().__init__('likelihood_field')
         
         filenameYaml=None
@@ -50,7 +48,7 @@ class mapManipulator(Node):
 
         self.image_array = np.array(pixels).reshape((height, width))
         self.o_x, self.o_y, self.res, self.thresh = self.read_description(filenameYaml)
-
+        print(self.o_x, self.o_y, self.res, self.thresh)
         self.laser_sig=laser_sig
         
         self.likelihood_msg=None
@@ -223,8 +221,6 @@ class mapManipulator(Node):
         grid.info.origin.orientation.w = np.cos(-np.pi/4)
         grid.info.origin.orientation.z = np.sin(-np.pi/4)
         offset = -self.height*self.getResolution()
-        print( offset )
-        print(self.getOrigin()[1])
 
 
         grid.info.origin.position.x, grid.info.origin.position.y = self.getOrigin()[0], +self.getOrigin()[1] - offset
